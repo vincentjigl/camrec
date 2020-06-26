@@ -909,11 +909,6 @@ status_t JglRecorder::start(sp<MediaCodecSource> *encoder) {
 		}
     }
 
-    if (mWriter == NULL) {
-        ALOGE("File writer is not avaialble");
-        return UNKNOWN_ERROR;
-    }
-
     switch (mOutputFormat) {
         case OUTPUT_FORMAT_DEFAULT:
         case OUTPUT_FORMAT_THREE_GPP:

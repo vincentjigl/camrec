@@ -61,6 +61,7 @@ char mRecordFileName[256];
 uint32_t mVideoBitRate      = 10000000;
 uint32_t mPreviewWidth;
 uint32_t mPreviewHeight;
+uint32_t mFrameNum = 0;
 
 // If seconds <  0, only the first frame is I frame, and rest are all P frames
 // If seconds == 0, all frames are encoded as I frames. No P frames
@@ -73,7 +74,7 @@ sp<SurfaceControl> surfaceControl;
 sp<Surface> previewSurface;
 CameraParameters params;
 JglRecorder* recorder;
-//sp<MediaCodecSource> encoder;
+sp<MediaCodecSource> encoder;
 int mOutputFd = -1;
 
 //To perform better
@@ -321,8 +322,8 @@ int startRecording() {
     }
 
     printf("-----------line %d, start record \n", __LINE__);
-    //if ( recorder->start(&encoder) < 0 ) {
-    if ( recorder->start() < 0 ) {
+    if ( recorder->start(&encoder) < 0 ) {
+    //if ( recorder->start() < 0 ) {
         VTC_LOGD("recorder start failed\n");
         return -1;
     }
@@ -356,13 +357,14 @@ int test() {
     int64_t start = systemTime();
 	
     startRecording();
-    #if 0
     MediaBuffer* mbuf;
-    while(encoder->read(&mbuf)==OK){
+    while((encoder->read(&mbuf)==OK) && (mFrameNum <= mDuration*30)){
+
         printf("-----------line %d, get one frame \n", __LINE__);
+        write(mOutputFd, (const uint8_t *)mbuf->data() + mbuf->range_offset(), mbuf->range_length());
+        mbuf->release();
+        mFrameNum++;
     }
-    #endif
-    sleep(mDuration);
     int64_t end = systemTime();
 	stopRecording();
     stopPreview();
